@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADMIN SPB</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Library for reading Excel files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <!--
+      CATATAN: Script Tailwind CSS di bawah ini sangat bagus untuk pengembangan tetapi akan menampilkan peringatan di konsol.
+      Untuk penggunaan production, disarankan untuk menginstal Tailwind melalui npm dan membuat file CSS statis.
+      Ini akan meningkatkan performa dan menghilangkan peringatan tersebut. Lihat: https://tailwindcss.com/docs/installation
+    -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="root"></div>
+    <!-- Hanya app.js yang perlu dimuat. Ia akan mengimpor semua file lain yang dibutuhkannya. -->
+    <script type="text/babel" data-type="module" src="/src/app.js"></script>
+</body>
+</html>

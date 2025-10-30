@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surat Pemberitahuan</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            line-height: 1.2;
+            margin: 0cm 0.7cm;
+            text-align: justify;
+        }
+        .letter-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 98vh; /* Use vh to approximate A4 height */
+        }
+        
+        /* Style dari SP.html */
+        .logo {
+            font-size: 25pt;
+            font-family: 'Bookman Old Style';
+        }
+        
+        .alamat {
+            font-size: 10pt;
+            font-family: Times New Roman;
+        }
+        
+        .linkblu {
+            color: blue;
+        }
+        
+        hr.garis {
+            height: 2px;
+            border-top: 3px solid black;
+            border-bottom: 1px solid black;
+            margin-bottom: 15px;
+            /* A more stable way to create a full-width line */
+            width: calc(100% + 1.4cm); /* 100% + left margin + right margin */
+            margin-left: -0.7cm; /* Negative margin to pull it left */
+            margin-right: -0.7cm; /* Negative margin to pull it right */
+        }
+        
+        /* Style untuk header surat */
+        .header {
+            margin-top: 15px;
+            margin-bottom: 20px;
+            font-size: 11pt;
+            font-weight: bold;
+        }
+        
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+        }
+        
+        /* Style untuk recipient */
+        .recipient {
+            margin-bottom: 25px;
+            font-size: 12pt;
+            font-weight: bold;
+        }
+        
+        /* Style untuk greeting */
+        .greeting {
+            margin-left: 80px;
+            margin-bottom: 20px;
+        }
+        
+        /* Style untuk content paragraf */
+        .content {
+            text-indent: 50px;
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        /* Style untuk list item */
+        .list-item {
+            margin-left: 80px;
+            margin-bottom: 15px;
+            text-indent: 0;
+        }
+        
+        /* Style untuk closing */
+        .closing {
+            margin-left: 80px;
+            margin-top: 30px;
+            margin-bottom: 50px;
+        }
+        
+        /* Style untuk signature */
+        .signature {
+            margin-top: auto; /* Pushes the signature to the bottom */
+            text-align: right;
+            page-break-inside: avoid;
+            margin-right: 50px;
+        }
+        
+        .signature-name {
+            margin-top: 80px;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="letter-container">
+    <!-- KOP SURAT -->
+    <table width="100%" border="0">
+        <tr>
+            <td rowspan="4" valign="middle" align="center" width="25%"> 
+                <img src="«Logo_Image»" alt="Logo Sekolah" width="155" height="85"/> 
+            </td>
+            <td align="center" width="75%" class="logo"><b>SEKOLAH PUTRA BATAM</b></td>
+            <td rowspan="4">&nbsp;</td>
+        </tr>
+        <tr>
+            <td align="center" class="alamat">Jl. Letjend R. Soeprato, Komplek Muka Kuning Indah II, Batu Aji, Kota Batam,</td>
+        </tr>
+        <tr>
+            <td align="center" class="alamat">Kepri-Indonesia Hp. 0822-8411-6455 <br/>Website: <span class="linkblu">www.putrabatam.sch.id</span> dan Email: <span class="linkblu">info@putrabatam.sch.id</span></td>
+        </tr>
+    </table>
+    <hr class="garis">
+    
+    <!-- ISI SURAT -->
+    <div class="main-content">
+        <div class="header">
+            <div class="header-row">
+                <div>No : «No_Surat»</div>
+                <div>Batam, «tanggal_surat»</div>
+            </div>
+            <div>Perihal : Pemberitahuan</div>
+        </div>
+
+        <div class="recipient">
+            Yth. Orang Tua Siswa dari «Nama»<br>
+            Kelas «kelas» PUTRA BATAM
+        </div>
+
+        <div class="greeting">
+            Dengan hormat,
+        </div>
+
+        <div class="content">
+            Salam sejahtera bagi kita semua. Doa dan harapan kami semoga Bapak/Ibu senantiasa berada dalam keadaan sehat walafiat dilindungi Tuhan sehingga sukses dalam melaksanakan tugas sehari-hari. Amin.
+        </div>
+
+        <div class="content">
+            Berdasarkan Pernyataan Tagihan yang sudah Bapak/Ibu tanda tangani bahwasanya untuk pembayaran Biaya Operasional Pendidikan (BOP) paling lambat dibayarkan tanggal 10 setiap bulannya, untuk itu bersama <b>«suratperingatan»</b> ini kami dari Pihak Keuangan Putra Batam kembali menginformasikan tunggakan Biaya Operasional Pendidikan (BOP) anak Bapak/Ibu yang bernama <b>«Nama» «kelas»</b> adalah :
+        </div>
+
+        <div class="list-item">
+            1. Biaya Operasional Pendidikan (BOP) dari bulan «bulan» 2025 perbulan Rp «NILAI» (belum termasuk denda)
+        </div>
+
+        <div class="content">
+            Apabila pembayaran tersebut sudah Bapak/Ibu transfer ke Virtual BCA,Virtual BNI dan Rekening Bank Putra Batam, mohon mengirimkan bukti transfer sama wali kelas «Kelas» dan mohon mengabaikan pesan ini, apabila belum membayar tunggakan tersebut diharapkan untuk membayarkannya.
+        </div>
+
+        <div class="closing">
+            Demikianlah surat pemberitahuan ini. Atas perhatian Bapak/Ibu kami ucapkan terima kasih.
+        </div>
+    </div>
+
+    <div class="signature">
+        <p style="padding-left: 259pt;text-indent: 0pt;text-align: center;">
+        Hormat Kami,<br>Bagian Keuangan Sekolah Putra Batam<br>
+        <img width="120" height="110" alt="Tanda Tangan" src="«ttdVale»" style="margin-top: 10px; margin-bottom: 10px;"/><br>
+        Valeryan Salsabilla Maurarochelle
+    </p>
+</div>
+</body>
+</html>

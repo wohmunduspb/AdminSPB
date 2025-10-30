@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paper Tracker - One Click Migration</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+            text-align: center;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .step {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        .step h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e4e8;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .file-drop-zone {
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: #f8f9ff;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+        .file-drop-zone:hover {
+            background: #e7f0ff;
+            border-color: #764ba2;
+        }
+        .file-drop-zone.drag-over {
+            background: #d4e7ff;
+            border-color: #28a745;
+        }
+        .file-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        .file-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .file-item {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e1e4e8;
+        }
+        .file-item-name {
+            font-weight: 600;
+            color: #333;
+        }
+        .file-item-size {
+            color: #666;
+            font-size: 13px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .progress-section {
+            display: none;
+            margin-top: 30px;
+        }
+        .progress-section.show {
+            display: block;
+        }
+        .progress-item {
+            margin-bottom: 20px;
+        }
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .progress-label {
+            font-weight: 600;
+            color: #333;
+        }
+        .progress-status {
+            font-size: 14px;
+            color: #666;
+        }
+        .progress-bar-container {
+            width: 100%;
+            height: 12px;
+            background: #e1e4e8;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .summary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 30px;
+            display: none;
+        }
+        .summary.show {
+            display: block;
+            animation: slideIn 0.5s;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .summary h3 {
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .summary-stat {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .summary-stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .summary-stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .info-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .error-box {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            color: #721c24;
+            display: none;
+        }
+        .error-box.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 One-Click Migration</h1>
+        <p class="subtitle">Upload semua file CSV sekaligus dan migrasi otomatis!</p>
+
+        <div class="info-box">
+            <strong>📝 File yang dibutuhkan:</strong><br>
+            siswa.csv, guru.csv, paper.csv, sales.csv, inventory.csv, inventory_log.csv, users.csv, permissions.csv, nomorSurat.csv, trash.csv
+        </div>
+
+        <div class="step">
+            <h3>Step 1: Konfigurasi Supabase</h3>
+            <label>Supabase URL:</label>
+            <input type="text" id="supabaseUrl" placeholder="https://xxxxx.supabase.co">
+            
+            <label>Supabase Anon Key:</label>
+            <input type="password" id="supabaseKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Upload Semua File CSV</h3>
+            <div class="file-drop-zone" id="dropZone">
+                <div class="file-icon">📁</div>
+                <p style="color: #667eea; font-weight: 600; margin-bottom: 5px;">
+                    Klik atau drag & drop semua file CSV di sini
+                </p>
+                <p style="color: #666; font-size: 14px;">
+                    Upload hingga 10 file sekaligus
+                </p>
+                <input type="file" id="fileInput" multiple accept=".csv" style="display: none;">
+            </div>
+            
+            <div class="file-list" id="fileList"></div>
+        </div>
+
+        <button id="migrateBtn" onclick="startMigration()" disabled>
+            🚀 MULAI MIGRASI
+        </button>
+
+        <div class="progress-section" id="progressSection">
+            <h3 style="margin-bottom: 20px; color: #333;">📊 Progress Migrasi</h3>
+            <div id="progressList"></div>
+        </div>
+
+        <div class="summary" id="summary">
+            <h3>🎉 Migrasi Selesai!</h3>
+            <p>Semua data berhasil dimigrasikan ke Supabase</p>
+            <div class="summary-stats" id="summaryStats"></div>
+        </div>
+
+        <div class="error-box" id="errorBox"></div>
+    </div>
+
+    <script>
+        let supabase;
+        let selectedFiles = {};
+        let migrationResults = {};
+
+        const tableMapping = {
+            'siswa.csv': {
+                table: 'students',
+                label: 'Siswa',
+                transform: row => ({
+                    no_siswa: row.Nosiswa,
+                    nama: row.Nama,
+                    kelas: row.Kelas,
+                    jenis_kelamin: row['J.K'],
+                    agama: row.Agama,
+                    tahun_ajaran: row['Tahun Ajaran'],
+                    status: row.Status
+                })
+            },
+            'guru.csv': {
+                table: 'teachers',
+                label: 'Guru',
+                transform: row => ({
+                    kode_guru: row['Kode Guru'],
+                    nama_guru: row['Nama Guru'],
+                    pendidikan: row.Pendidikan,
+                    jabatan: row.Jabatan,
+                    wali_kelas: row['Wali Kelas'] || null,
+                    ruang: row.Ruang || null,
+                    total_siswa: row['Total Siswa'] ? parseInt(row['Total Siswa']) : null
+                })
+            },
+            'paper.csv': {
+                table: 'paper_logs',
+                label: 'Paper Logs',
+                transform: row => ({
+                    id: parseInt(row.id),
+                    date: row.date,
+                    name: row.name,
+                    purpose: row.purpose,
+                    quantity: parseInt(row.quantity)
+                })
+            },
+            'sales.csv': {
+                table: 'sales',
+                label: 'Sales',
+                transform: row => ({
+                    id: parseInt(row.id),
+                    date: row.date,
+                    item: row.item,
+                    quantity: parseInt(row.quantity),
+                    price: parseInt(row.price),
+                    status: row.status
+                })
+            },
+            'inventory.csv': {
+                table: 'inventory',
+                label: 'Inventory',
+                transform: row => ({
+                    nama: row.nama,
+                    stok: parseInt(row.stok),
+                    harga: parseInt(row.harga)
+                })
+            },
+            'inventory_log.csv': {
+                table: 'inventory_log',
+                label: 'Inventory Log',
+                transform: row => ({
+                    id: parseInt(row.id),
+                    date: row.date,
+                    item: row.item,
+                    change: parseInt(row.change),
+                    reason: row.reason,
+                    username: row.user
+                })
+            },
+            'users.csv': {
+                table: 'users',
+                label: 'Users',
+                transform: row => ({
+                    username: row.username,
+                    password: row.password,
+                    role: row.role
+                })
+            },
+            'permissions.csv': {
+                table: 'permissions',
+                label: 'Permissions',
+                transform: row => {
+                    const columnMap = {
+                        'dashboard_view': 'dashboard_view',
+                        'sales_view': 'sales_view',
+                        'sales_input': 'sales_input',
+                        'sales_edit': 'sales_edit',
+                        'sales_delete': 'sales_delete',
+                        'sales_close_batch': 'sales_close_batch',
+                        'paper_view': 'paper_view',
+                        'paper_input': 'paper_input',
+                        'surat_view': 'surat_view',
+                        'surat_generate': 'surat_generate',
+                        'surat_settings': 'surat_settings',
+                        'inventory_view': 'inventory_view',
+                        'inventory_add_stock': 'inventory_add_stock',
+                        'inventory_add_new_item': 'inventory_add_new_item',
+                        'inventory_correct_stock': 'inventory_correct_stock',
+                        'generate_surat_view': 'generate_surat_view',
+                        'generate_surat_simk': 'generate_surat_simk',
+                        'generate_surat_sp': 'generate_surat_sp',
+                        'report_view': 'report_view',
+                        'report_paper': 'report_paper',
+                        'report_sales': 'report_sales',
+                        'report_surat': 'report_surat',
+                        'report_simk': 'report_simk',
+                        'report_inventory_log': 'report_inventory_log',
+                        'settings_view': 'settings_view',
+                        'settings_permissions': 'settings_permissions',
+                        'settings_users': 'settings_users',
+                        'settings_trash': 'settings_trash',
+                        'settings_guru': 'settings_guru',
+                        'teachers_view': 'teachers_view',
+                        'students_view': 'students_view',
+                        'change_password_view': 'change_password_view'
+                    };
+                    
+                    const perm = { role: row.role };
+                    Object.keys(row).forEach(key => {
+                        if (key !== 'role' && columnMap[key]) {
+                            perm[columnMap[key]] = row[key] === 'TRUE';
+                        }
+                    });
+                    return perm;
+                }
+            },
+            'nomorSurat.csv': {
+                table: 'nomor_surat',
+                label: 'Nomor Surat',
+                transform: row => ({
+                    id: parseInt(row.id),
+                    nomor: row.nomor,
+                    kode: row.kode,
+                    tingkat: row.tingkat,
+                    bulan: parseInt(row.bulan),
+                    tahun: parseInt(row.tahun),
+                    catatan: row.catatan,
+                    tanggal_dibuat: row.tanggalDibuat,
+                    parent_id: row.parentId ? parseInt(row.parentId) : null
+                })
+            },
+            'trash.csv': {
+                table: 'trash',
+                label: 'Trash',
+                transform: row => ({
+                    id: parseInt(row.id),
+                    date: row.date,
+                    item: row.item,
+                    quantity: parseInt(row.quantity),
+                    price: parseInt(row.price),
+                    total: parseInt(row.total),
+                    deleted_from: row.deletedFrom,
+                    deleted_by: row.deletedBy,
+                    deleted_at: row.deletedAt
+                })
+            }
+        };
+
+        // Load saved config
+        window.onload = function() {
+            const url = localStorage.getItem('supabaseUrl');
+            const key = localStorage.getItem('supabaseKey');
+            if (url && key) {
+                document.getElementById('supabaseUrl').value = url;
+                document.getElementById('supabaseKey').value = key;
+                initSupabase();
+            }
+        };
+
+        function initSupabase() {
+            const url = document.getElementById('supabaseUrl').value.trim();
+            const key = document.getElementById('supabaseKey').value.trim();
+            
+            if (url && key) {
+                localStorage.setItem('supabaseUrl', url);
+                localStorage.setItem('supabaseKey', key);
+                supabase = window.supabase.createClient(url, key);
+                return true;
+            }
+            return false;
+        }
+
+        // File upload handling
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const migrateBtn = document.getElementById('migrateBtn');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('drag-over');
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            handleFiles(e.dataTransfer.files);
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            selectedFiles = {};
+            fileList.innerHTML = '';
+            
+            Array.from(files).forEach(file => {
+                if (file.name.endsWith('.csv')) {
+                    selectedFiles[file.name] = file;
+                    
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+                    fileItem.innerHTML = `
+                        <div>
+                            <div class="file-item-name">📄 ${file.name}</div>
+                            <div class="file-item-size">${(file.size / 1024).toFixed(1)} KB</div>
+                        </div>
+                        <span style="color: #28a745; font-size: 20px;">✓</span>
+                    `;
+                    fileList.appendChild(fileItem);
+                }
+            });
+
+            migrateBtn.disabled = Object.keys(selectedFiles).length === 0;
+        }
+
+        async function startMigration() {
+            if (!initSupabase()) {
+                showError('Masukkan Supabase URL dan Key terlebih dahulu!');
+                return;
+            }
+
+            if (Object.keys(selectedFiles).length === 0) {
+                showError('Upload minimal 1 file CSV!');
+                return;
+            }
+
+            migrateBtn.disabled = true;
+            document.getElementById('progressSection').classList.add('show');
+            document.getElementById('errorBox').classList.remove('show');
+
+            migrationResults = {};
+
+            for (const [filename, file] of Object.entries(selectedFiles)) {
+                await migrateFile(filename, file);
+            }
+
+            showSummary();
+        }
+
+        function migrateFile(filename, file) {
+            return new Promise((resolve) => {
+                const mapping = tableMapping[filename];
+                if (!mapping) {
+                    console.warn('No mapping for:', filename);
+                    resolve();
+                    return;
+                }
+
+                // Add progress UI
+                const progressList = document.getElementById('progressList');
+                const progressItem = document.createElement('div');
+                progressItem.className = 'progress-item';
+                progressItem.id = `progress-${filename}`;
+                progressItem.innerHTML = `
+                    <div class="progress-header">
+                        <span class="progress-label">${mapping.label}</span>
+                        <span class="progress-status" id="status-${filename}">⏳ Memproses...</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="bar-${filename}" style="width: 0%"></div>
+                    </div>
+                `;
+                progressList.appendChild(progressItem);
+
+                Papa.parse(file, {
+                    header: true,
+                    complete: async function(results) {
+                        const data = results.data.filter(row => Object.values(row).some(v => v));
+                        const statusEl = document.getElementById(`status-${filename}`);
+                        const barEl = document.getElementById(`bar-${filename}`);
+                        
+                        let success = 0;
+                        let failed = 0;
+                        const batchSize = 100;
+
+                        try {
+                            for (let i = 0; i < data.length; i += batchSize) {
+                                const batch = data.slice(i, i + batchSize).map(mapping.transform);
+                                
+                                const { error } = await supabase
+                                    .from(mapping.table)
+                                    .insert(batch);
+                                
+                                if (error) {
+                                    console.error(`Error in ${filename}:`, error);
+                                    failed += batch.length;
+                                } else {
+                                    success += batch.length;
+                                }
+                                
+                                const progress = Math.min(100, Math.round((i + batch.length) / data.length * 100));
+                                barEl.style.width = progress + '%';
+                            }
+
+                            migrationResults[mapping.label] = { success, failed, total: data.length };
+                            
+                            if (failed === 0) {
+                                statusEl.textContent = `✅ ${success} rows`;
+                                statusEl.style.color = '#28a745';
+                            } else {
+                                statusEl.textContent = `⚠️ ${success} OK | ${failed} Gagal`;
+                                statusEl.style.color = '#ffc107';
+                            }
+                        } catch (e) {
+                            console.error('Migration error:', e);
+                            statusEl.textContent = '❌ Error';
+                            statusEl.style.color = '#dc3545';
+                            migrationResults[mapping.label] = { success: 0, failed: data.length, total: data.length };
+                        }
+
+                        resolve();
+                    },
+                    error: function(error) {
+                        console.error('Parse error:', error);
+                        resolve();
+                    }
+                });
+            });
+        }
+
+        function showSummary() {
+            let totalSuccess = 0;
+            let totalFailed = 0;
+            let totalRows = 0;
+
+            Object.values(migrationResults).forEach(result => {
+                totalSuccess += result.success;
+                totalFailed += result.failed;
+                totalRows += result.total;
+            });
+
+            const summaryStats = document.getElementById('summaryStats');
+            summaryStats.innerHTML = `
+                <div class="summary-stat">
+                    <div class="summary-stat-value">${totalRows}</div>
+                    <div class="summary-stat-label">Total Rows</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="summary-stat-value">${totalSuccess}</div>
+                    <div class="summary-stat-label">Berhasil ✅</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="summary-stat-value">${totalFailed}</div>
+                    <div class="summary-stat-label">Gagal ❌</div>
+                </div>
+            `;
+
+            document.getElementById('summary').classList.add('show');
+            migrateBtn.disabled = false;
+            migrateBtn.textContent = '🔄 Migrasi Ulang';
+        }
+
+        function showError(message) {
+            const errorBox = document.getElementById('errorBox');
+            errorBox.textContent = '❌ ' + message;
+            errorBox.classList.add('show');
+        }
+    </script>
+</body>
+</html>
